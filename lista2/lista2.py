@@ -22,7 +22,7 @@ def countA(aValues:np.ndarray, l:list, matrix:np.ndarray):
         i += 1
         
 # Function which counts average T using the right formula.  
-def countT(aValues:np.ndarray, g:nx.Graph, GValue:int, m:int)->float:
+def countT(aValues:np.ndarray, g:nx.Graph, GValue:int, m:int):
     sum = 0
     x = 0
     for u, v, data in g.edges(data=True):
@@ -39,11 +39,14 @@ def countAverageCapacity(g:nx.Graph):
     sumCapacity = 0
     for _, _, data in g.edges(data=True):
         sumCapacity += data["capacity"]
-    return sumCapacity/g.number_of_edges
+    return sumCapacity/g.number_of_edges()
 
 # values stored in matrix are numbers of packages sent between two nodes
-def createFlowMatrix(numberOfNodes, whichValues=0):
-    values = [[1,2,3,4,1], [2,3,3,4,2], [2,4,5,5,2]]
+def createFlowMatrix(numberOfNodes:int, givenValues=[]):
+    if len(givenValues) != 0:
+        values = givenValues
+    else:
+        values = [1,2,3,4,1]
     matrix = np.ndarray(shape=(numberOfNodes,numberOfNodes), dtype=int)
     i = 0
     GValue = 0
@@ -54,13 +57,13 @@ def createFlowMatrix(numberOfNodes, whichValues=0):
         while(k<numberOfNodes):
             value = k%5
             GValue = GValue + 2*value
-            matrix[i][k] = values[whichValues][value]
-            matrix[k][i] = values[whichValues][value]
+            matrix[i][k] = values[value]
+            matrix[k][i] = values[value]
             k = k + 1
         i = i + 1
     return matrix, GValue
 
-def createGraph(numberOfNodes, numberOfEdges, minCapacity=1400000, maxCapacity=1600000, randomEdges=False):
+def createGraph(numberOfNodes:int, numberOfEdges:int, minCapacity=1400000, maxCapacity=1600000, randomEdges=False):
     # creating graph and adding nodes
     g = nx.Graph()
     i = 1
@@ -81,7 +84,7 @@ def createGraph(numberOfNodes, numberOfEdges, minCapacity=1400000, maxCapacity=1
             v = rand.randint(1, numberOfNodes)
             while(v == u):
                 v = rand.randint(1, numberOfNodes)
-        g.add_edge(u, v, capacity=rand.randint(minCapacity, maxCapacity))
+            g.add_edge(u, v, capacity=rand.randint(minCapacity, maxCapacity))
     else: # should add edges from the set
         other_edges = [(1,19),(1,15),(2,14),(2,6),(3,8),(4,12),(6,17),(7,10),(9,13),(10,20)] # edges chosen to add to graph g
         for u, v in other_edges:
@@ -89,7 +92,7 @@ def createGraph(numberOfNodes, numberOfEdges, minCapacity=1400000, maxCapacity=1
 
     return g        
 
-def testNetwork(numberOfTrials, g:nx.Graph, matrix, probability, Tmax, m, GValue):
+def testNetwork(numberOfTrials:int, g:nx.Graph, matrix:np.ndarray, probability:float, Tmax:float, m:int, GValue:int):
     counter = 0
     reliability = 0
     # variables which store informations about numbers of errors occured
